@@ -97,4 +97,33 @@ class BudgetGuardIntegrationTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("positive");
     }
+
+    @Test
+    void billingWorksWithMultipleDifferentModels() {
+        // Two models with different pricing: expensiveModel ($2/token), cheapModel ($1/token)
+        ModelPricing expensivePricing = ModelPricing.perMillionTokens("USD", 2_000_000, 2_000_000);
+        ModelPricing cheapPricing = ModelPricing.perMillionTokens("USD", 1_000_000, 1_000_000);
+        PricingCatalog catalog = StaticPricingCatalog.builder()
+                .register("expensive-model", expensivePricing)
+                .register("cheap-model", cheapPricing)
+                .build();
+
+        BudgetGuard guard = BudgetGuard.builder()
+                .limit(Money.of("10.00", "USD"))
+                .onExceed(ExceedPolicy.STOP)
+                .pricingCatalog(catalog)
+                .build();
+
+        FakeLlmClient client = new FakeLlmClient()
+                .thenReply("expensive", 1, 1) // expensive-model: 1 input + 1 output = $2 + $2 = $4
+                .thenReply("cheap", 1, 1);     // cheap-model: 1 input + 1 output = $1 + $1 = $2
+
+        String first = guard.wrap("expensive-model", () -> client.chat("hello"));
+        assertThat(first).isEqualTo("expensive");
+        assertThat(guard.spend()).isEqualTo(Money.of("4.00", "USD"));
+
+        String second = guard.wrap("cheap-model", () -> client.chat("again"));
+        assertThat(second).isEqualTo("cheap");
+        assertThat(guard.spend()).isEqualTo(Money.of("6.00", "USD"));
+    }
 }
