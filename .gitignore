@@ -1,0 +1,15 @@
+# Planning docs — not part of the published library
+/issues/
+/Project_description.md
+/PRD-budget-enforcement.md
+
+# Maven
+target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
