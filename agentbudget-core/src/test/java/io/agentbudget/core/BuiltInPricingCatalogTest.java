@@ -17,10 +17,10 @@ class BuiltInPricingCatalogTest {
     }
 
     @Test
-    void hasClaude35Sonnet() {
+    void hasClaudeSonnet5() {
         PricingCatalog catalog = BuiltInPricingCatalog.catalog();
 
-        Money cost = catalog.price("claude-3-5-sonnet-20241022", TokenUsage.of(1_000_000, 1_000_000));
+        Money cost = catalog.price("claude-sonnet-5", TokenUsage.of(1_000_000, 1_000_000));
 
         assertThat(cost).isEqualTo(Money.of("18.00", "USD"));
     }

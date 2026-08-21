@@ -41,7 +41,7 @@ ANTHROPIC_API_KEY=sk-ant-... \
 ## Cost per run
 
 Models used are the cheapest ones already in `BuiltInPricingCatalog`: `gpt-4o` and
-`claude-3-haiku-20250307`. Prompts are short and replies are capped at 10 or 300 tokens.
+`claude-haiku-4-5`. Prompts are short and replies are capped at 10 or 300 tokens.
 
 | Test | Tokens (approx.) | Cost (approx.) |
 |---|---|---|

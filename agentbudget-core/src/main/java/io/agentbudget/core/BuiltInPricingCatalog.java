@@ -1,9 +1,12 @@
 package io.agentbudget.core;
 
 /**
- * Built-in pricing for current OpenAI and Anthropic models. Pricing verified against
- * providers' published pricing pages. Use {@link #catalog()} to get a replaceable catalog
- * for testing, or {@link #withCustomRegistration()} to add custom models.
+ * Built-in pricing for current OpenAI and Anthropic models. Anthropic rates verified against
+ * the Claude API's live current-models reference as of Aug 2026; OpenAI rates are carried over
+ * from an earlier check and have not been independently re-verified against OpenAI's pricing
+ * page at that same date -- treat gpt-4o/gpt-4-turbo/gpt-4 rates here as provisional pending
+ * that check. Use {@link #catalog()} to get a replaceable catalog for testing, or
+ * {@link #withCustomRegistration()} to add custom models.
  */
 public final class BuiltInPricingCatalog {
 
@@ -15,9 +18,9 @@ public final class BuiltInPricingCatalog {
                 .register("gpt-4o", gpt4o())
                 .register("gpt-4-turbo", gpt4Turbo())
                 .register("gpt-4", gpt4())
-                .register("claude-3-5-sonnet-20241022", claude35Sonnet())
-                .register("claude-3-opus-20250219", claude3Opus())
-                .register("claude-3-haiku-20250307", claude3Haiku())
+                .register("claude-sonnet-5", claudeSonnet5())
+                .register("claude-opus-5", claudeOpus5())
+                .register("claude-haiku-4-5", claudeHaiku45())
                 .build();
     }
 
@@ -26,12 +29,12 @@ public final class BuiltInPricingCatalog {
                 .register("gpt-4o", gpt4o())
                 .register("gpt-4-turbo", gpt4Turbo())
                 .register("gpt-4", gpt4())
-                .register("claude-3-5-sonnet-20241022", claude35Sonnet())
-                .register("claude-3-opus-20250219", claude3Opus())
-                .register("claude-3-haiku-20250307", claude3Haiku());
+                .register("claude-sonnet-5", claudeSonnet5())
+                .register("claude-opus-5", claudeOpus5())
+                .register("claude-haiku-4-5", claudeHaiku45());
     }
 
-    // OpenAI pricing as of Feb 2025
+    // OpenAI pricing as of Feb 2025 -- not re-verified since; see class javadoc.
     // https://openai.com/pricing
     private static ModelPricing gpt4o() {
         return ModelPricing.perMillionTokens("USD", 2.50, 0.50, 10.00);
@@ -45,17 +48,17 @@ public final class BuiltInPricingCatalog {
         return ModelPricing.perMillionTokens("USD", 30.00, 15.00, 60.00);
     }
 
-    // Anthropic pricing as of Feb 2025
-    // https://www.anthropic.com/pricing/claude
-    private static ModelPricing claude35Sonnet() {
+    // Anthropic standard (non-introductory) API rates as of Aug 2026. Cached-input rate is
+    // Anthropic's standard cache-read discount, ten percent of the input rate.
+    private static ModelPricing claudeSonnet5() {
         return ModelPricing.perMillionTokens("USD", 3.00, 0.30, 15.00);
     }
 
-    private static ModelPricing claude3Opus() {
-        return ModelPricing.perMillionTokens("USD", 15.00, 1.50, 75.00);
+    private static ModelPricing claudeOpus5() {
+        return ModelPricing.perMillionTokens("USD", 5.00, 0.50, 25.00);
     }
 
-    private static ModelPricing claude3Haiku() {
-        return ModelPricing.perMillionTokens("USD", 0.80, 0.08, 4.00);
+    private static ModelPricing claudeHaiku45() {
+        return ModelPricing.perMillionTokens("USD", 1.00, 0.10, 5.00);
     }
 }

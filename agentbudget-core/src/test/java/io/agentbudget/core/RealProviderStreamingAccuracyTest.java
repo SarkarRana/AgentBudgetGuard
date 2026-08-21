@@ -44,7 +44,7 @@ class RealProviderStreamingAccuracyTest {
     private static final double TOLERANCE = 0.01;
 
     private static final String OPENAI_MODEL = "gpt-4o";
-    private static final String ANTHROPIC_MODEL = "claude-3-haiku-20250307";
+    private static final String ANTHROPIC_MODEL = "claude-haiku-4-5";
 
     private static final ChunkInspector<OpenAiRealStreamClient.Chunk> OPENAI_INSPECTOR =
             ChunkInspector.of(OpenAiRealStreamClient.Chunk::textDelta, OpenAiRealStreamClient.Chunk::usageFrame);
