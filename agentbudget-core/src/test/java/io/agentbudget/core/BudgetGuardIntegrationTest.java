@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class BudgetGuardIntegrationTest {
 
     private static final String MODEL = "fake-model";
+    private static final String SESSION = "session-1";
 
     private BudgetGuard guardWithLimit(String limit) {
         ModelPricing pricing = ModelPricing.perMillionTokens("USD", 1_000_000, 1_000_000); // $1 per token, for round numbers
@@ -31,15 +32,15 @@ class BudgetGuardIntegrationTest {
                 .thenReply("hi", 1, 1) // costs $2, exactly hits the limit
                 .thenReply("hi again", 1, 0); // would cost $1 more, but never runs
 
-        String first = guard.wrap(MODEL, () -> client.chat("hello"));
+        String first = guard.wrap(SESSION, MODEL, () -> client.chat("hello"));
         assertThat(first).isEqualTo("hi");
-        assertThat(guard.spend()).isEqualTo(Money.of("2.00", "USD"));
+        assertThat(guard.spend(SESSION)).isEqualTo(Money.of("2.00", "USD"));
 
-        assertThatThrownBy(() -> guard.wrap(MODEL, () -> client.chat("hello again")))
+        assertThatThrownBy(() -> guard.wrap(SESSION, MODEL, () -> client.chat("hello again")))
                 .isInstanceOf(BudgetExceededException.class)
                 .satisfies(e -> {
                     BudgetExceededException ex = (BudgetExceededException) e;
-                    assertThat(ex.sessionId()).isEqualTo(guard.sessionId());
+                    assertThat(ex.sessionId()).isEqualTo(SESSION);
                     assertThat(ex.limit()).isEqualTo(Money.of("2.00", "USD"));
                     assertThat(ex.currentSpend()).isEqualTo(Money.of("2.00", "USD"));
                 });
@@ -53,11 +54,11 @@ class BudgetGuardIntegrationTest {
         BudgetGuard guard = guardWithLimit("5.00");
         FakeLlmClient client = new FakeLlmClient().thenFailBeforeReachingProvider();
 
-        assertThatThrownBy(() -> guard.wrap(MODEL, () -> client.chat("hello")))
+        assertThatThrownBy(() -> guard.wrap(SESSION, MODEL, () -> client.chat("hello")))
                 .isInstanceOf(RuntimeException.class)
                 .isNotInstanceOf(AgentBudgetException.class);
 
-        assertThat(guard.spend()).isEqualTo(Money.zero(java.util.Currency.getInstance("USD")));
+        assertThat(guard.spend(SESSION)).isEqualTo(Money.zero(java.util.Currency.getInstance("USD")));
     }
 
     @Test
@@ -65,10 +66,10 @@ class BudgetGuardIntegrationTest {
         BudgetGuard guard = guardWithLimit("5.00");
         FakeLlmClient client = new FakeLlmClient().thenFailAfterGeneratingTokens(1, 1); // costs $2
 
-        assertThatThrownBy(() -> guard.wrap(MODEL, () -> client.chat("hello")))
+        assertThatThrownBy(() -> guard.wrap(SESSION, MODEL, () -> client.chat("hello")))
                 .isInstanceOf(PartialUsageException.class);
 
-        assertThat(guard.spend()).isEqualTo(Money.of("2.00", "USD"));
+        assertThat(guard.spend(SESSION)).isEqualTo(Money.of("2.00", "USD"));
     }
 
     @Test
@@ -78,11 +79,11 @@ class BudgetGuardIntegrationTest {
                 .thenReply("a", 1, 0)
                 .thenReply("b", 1, 0);
 
-        guard.wrap(MODEL, () -> client.chat("first"));
-        assertThat(guard.remaining()).isEqualTo(Money.of("4.00", "USD"));
+        guard.wrap(SESSION, MODEL, () -> client.chat("first"));
+        assertThat(guard.remaining(SESSION)).isEqualTo(Money.of("4.00", "USD"));
 
-        guard.wrap(MODEL, () -> client.chat("second"));
-        assertThat(guard.remaining()).isEqualTo(Money.of("3.00", "USD"));
+        guard.wrap(SESSION, MODEL, () -> client.chat("second"));
+        assertThat(guard.remaining(SESSION)).isEqualTo(Money.of("3.00", "USD"));
     }
 
     @Test
@@ -118,12 +119,12 @@ class BudgetGuardIntegrationTest {
                 .thenReply("expensive", 1, 1) // expensive-model: 1 input + 1 output = $2 + $2 = $4
                 .thenReply("cheap", 1, 1);     // cheap-model: 1 input + 1 output = $1 + $1 = $2
 
-        String first = guard.wrap("expensive-model", () -> client.chat("hello"));
+        String first = guard.wrap(SESSION, "expensive-model", () -> client.chat("hello"));
         assertThat(first).isEqualTo("expensive");
-        assertThat(guard.spend()).isEqualTo(Money.of("4.00", "USD"));
+        assertThat(guard.spend(SESSION)).isEqualTo(Money.of("4.00", "USD"));
 
-        String second = guard.wrap("cheap-model", () -> client.chat("again"));
+        String second = guard.wrap(SESSION, "cheap-model", () -> client.chat("again"));
         assertThat(second).isEqualTo("cheap");
-        assertThat(guard.spend()).isEqualTo(Money.of("6.00", "USD"));
+        assertThat(guard.spend(SESSION)).isEqualTo(Money.of("6.00", "USD"));
     }
 }

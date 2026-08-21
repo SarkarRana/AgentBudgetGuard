@@ -27,4 +27,9 @@ public record TokenUsage(long inputTokens, long cachedInputTokens, long outputTo
     public static TokenUsage of(long inputTokens, long outputTokens) {
         return new TokenUsage(inputTokens, 0, outputTokens);
     }
+
+    /** This usage with its output count replaced. */
+    public TokenUsage withOutputTokens(long outputTokens) {
+        return new TokenUsage(inputTokens, cachedInputTokens, outputTokens);
+    }
 }

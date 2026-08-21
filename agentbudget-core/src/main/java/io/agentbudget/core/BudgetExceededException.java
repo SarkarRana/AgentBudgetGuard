@@ -4,7 +4,7 @@ package io.agentbudget.core;
  * Thrown by {@link BudgetGuard#wrap} when the session has already reached its limit. The
  * underlying call is never invoked.
  */
-public final class BudgetExceededException extends AgentBudgetException {
+public final class BudgetExceededException extends BudgetDecisionException {
 
     private final String sessionId;
     private final Money limit;
