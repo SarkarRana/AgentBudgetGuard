@@ -1,0 +1,2 @@
+io.agentbudget.springboot.AgentBudgetAutoConfiguration
+io.agentbudget.springboot.BudgetedSupportAutoConfiguration

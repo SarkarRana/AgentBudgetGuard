@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.github.sarkarrana</groupId>
+    <artifactId>agentbudget-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>agentbudget-spring-boot-starter</artifactId>
+  <name>AgentBudgetGuard :: Spring Boot Starter</name>
+  <description>Spring Boot auto-configuration: application.yml properties, default beans that
+    back off on the user's own, and HTTP exception mapping.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.github.sarkarrana</groupId>
+      <artifactId>agentbudget-spring</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-autoconfigure</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <!-- Needed for the "request" budget window (RequestContextHolder) and the HTTP exception
+         mapping (ProblemDetail, @RestControllerAdvice). Both back off gracefully - see
+         AgentBudgetAutoConfiguration - so a non-web Boot application (a batch job, a CLI) still
+         gets everything else and simply never activates either. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <!-- this project's own test stack, pinned by the root POM's JUnit BOM -->
+        <exclusion>
+          <groupId>org.junit.jupiter</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Explicit rather than relying on classpath auto-discovery of the processor: this
+           project does not inherit spring-boot-starter-parent, which is what normally wires this
+           up automatically, and auto-discovery did not fire reliably without it. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-configuration-processor</artifactId>
+              <version>${spring.boot.version}</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>ban-bytecode-manipulation</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <bannedDependencies>
+                  <searchTransitive>true</searchTransitive>
+                  <includes>
+                    <include>cglib:*</include>
+                    <include>org.aspectj:*</include>
+                    <include>net.bytebuddy:*</include>
+                    <include>org.javassist:*</include>
+                    <include>javassist:*</include>
+                  </includes>
+                  <excludes>
+                    <exclude>net.bytebuddy:byte-buddy:*:*:test</exclude>
+                  </excludes>
+                  <message>
+                    Same rule as agentbudget-spring: proxy-based Spring AOP only, so no bytecode
+                    manipulation library belongs on the compile or runtime classpath.
+                  </message>
+                </bannedDependencies>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
