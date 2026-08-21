@@ -68,4 +68,25 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <!-- central-publishing-maven-plugin takes over the deploy phase itself, so it does not
+         respect maven.deploy.skip the way the standard deploy plugin does. skipPublishing is
+         its own equivalent, needed here so `mvn deploy -Prelease` from the root doesn't try to
+         bundle this unsigned, sourceless demo jar into the release. -->
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <configuration>
+              <skipPublishing>true</skipPublishing>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
