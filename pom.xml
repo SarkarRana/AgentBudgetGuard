@@ -16,6 +16,7 @@
     <module>agentbudget-core</module>
     <module>agentbudget-spring</module>
     <module>agentbudget-spring-boot-starter</module>
+    <module>agentbudget-demo</module>
   </modules>
 
   <properties>

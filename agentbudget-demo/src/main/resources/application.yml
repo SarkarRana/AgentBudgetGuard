@@ -1,0 +1,10 @@
+server:
+  port: 8080
+
+agentbudget:
+  limit: "$3.00"
+  on-exceed: STOP
+
+spring:
+  application:
+    name: agentbudget-demo
