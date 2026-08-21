@@ -16,6 +16,16 @@
   <name>AgentBudgetGuard :: Core</name>
   <description>Core budget enforcement engine. Depends on the JDK only.</description>
 
+  <properties>
+    <!-- Real-provider tests spend real money and need API keys a human supplies (issue 06).
+         Excluded here by default so the default build and CI never run them; the
+         real-provider-tests profile below overrides this property to opt in explicitly. A
+         property override is used rather than re-declaring the plugin's <configuration> in the
+         profile, because Maven merges rather than replaces plugin configuration across profile
+         boundaries, so an empty <excludedGroups/> in a profile does not reliably clear it. -->
+    <surefire.excludedGroups>real-provider</surefire.excludedGroups>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -35,7 +45,19 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludedGroups>${surefire.excludedGroups}</excludedGroups>
+        </configuration>
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>real-provider-tests</id>
+      <properties>
+        <surefire.excludedGroups></surefire.excludedGroups>
+      </properties>
+    </profile>
+  </profiles>
 </project>
