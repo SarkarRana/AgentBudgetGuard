@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.github.sarkarrana</groupId>
+    <artifactId>agentbudget-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>agentbudget-spring</artifactId>
+  <name>AgentBudgetGuard :: Spring</name>
+  <description>Spring adapter: the @Budgeted annotation and its AOP advice.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.github.sarkarrana</groupId>
+      <artifactId>agentbudget-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!-- Proxy-based Spring AOP only. Note what is NOT here: no org.aspectj:aspectjweaver, no
+         cglib, no net.bytebuddy. The advice is a plain MethodInterceptor behind a
+         DefaultPointcutAdvisor, which needs none of them - see BudgetedAdvisor. -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-aop</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- The "Spring AOP proxies only" rule, enforced rather than merely intended. Proxying here
+           is JDK dynamic proxies behind a DefaultPointcutAdvisor, so none of these belong on the
+           compile or runtime classpath, and a transitive dependency that dragged one in would
+           break the build rather than quietly change how beans are proxied.
+
+           Two things this deliberately does not ban. byte-buddy arrives test-scoped through
+           AssertJ and is never shipped. And spring-core carries its own repackaged copy of cglib
+           under org.springframework.cglib, which no Spring application can avoid - what matters
+           is that this module never asks for class proxying, which BudgetedConfiguration does not. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>ban-bytecode-manipulation</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <bannedDependencies>
+                  <searchTransitive>true</searchTransitive>
+                  <includes>
+                    <include>cglib:*</include>
+                    <include>org.aspectj:*</include>
+                    <include>net.bytebuddy:*</include>
+                    <include>org.javassist:*</include>
+                    <include>javassist:*</include>
+                  </includes>
+                  <excludes>
+                    <!-- test-scoped only, via AssertJ; never shipped -->
+                    <exclude>net.bytebuddy:byte-buddy:*:*:test</exclude>
+                  </excludes>
+                  <message>
+                    agentbudget-spring uses proxy-based Spring AOP only. A bytecode manipulation
+                    library on the compile or runtime classpath means something has pulled in
+                    class proxying or AspectJ weaving - see BudgetedConfiguration.
+                  </message>
+                </bannedDependencies>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
