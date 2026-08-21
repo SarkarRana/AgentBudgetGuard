@@ -21,7 +21,7 @@ A session that has already spent `$2.00` throws `BudgetExceededException` here, 
 
 ## Status
 
-`0.1.0-SNAPSHOT`. Not yet published to Maven Central (tracked in
+`0.1.0`. Not yet published to Maven Central (tracked in
 [issue 17](issues/17-maven-central-publishing.md)) -- for now, build it from source once and the
 Maven coordinates below resolve out of your local repository like any other dependency:
 
@@ -45,7 +45,7 @@ Needs only `agentbudget-core`, and nothing about your project beyond the JDK:
 <dependency>
     <groupId>io.github.sarkarrana</groupId>
     <artifactId>agentbudget-core</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
 </dependency>
 ```
 
@@ -78,7 +78,7 @@ Add `agentbudget-spring-boot-starter` and the limit resolves from `application.y
 <dependency>
     <groupId>io.github.sarkarrana</groupId>
     <artifactId>agentbudget-spring-boot-starter</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
 </dependency>
 ```
 
