@@ -1,5 +1,9 @@
 # AgentBudgetGuard
 
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.sarkarrana/agentbudget-core.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.sarkarrana/agentbudget-core)
+[![CI](https://github.com/SarkarRana/AgentBudgetGuard/actions/workflows/ci.yml/badge.svg)](https://github.com/SarkarRana/AgentBudgetGuard/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+
 Budget enforcement and a circuit breaker for Java AI agents. Wrap a call to any LLM client (or
 annotate a Spring bean method), give it a spend limit, and the session that exceeds it is refused
 before another dollar goes out -- instead of your bill telling you about it tomorrow.
