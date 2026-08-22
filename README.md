@@ -21,15 +21,9 @@ A session that has already spent `$2.00` throws `BudgetExceededException` here, 
 
 ## Status
 
-`0.1.0`. Not yet published to Maven Central (tracked in
-[issue 17](issues/17-maven-central-publishing.md)) -- for now, build it from source once and the
-Maven coordinates below resolve out of your local repository like any other dependency:
-
-```bash
-git clone <this repository>
-cd AgentBudgetGuard
-mvn install
-```
+`0.1.0`, published on Maven Central under `io.github.sarkarrana` -- add the dependency shown
+below and it resolves like any other library, no local build required. See
+[issue 17](issues/17-maven-central-publishing.md) for how it got there.
 
 ## Quickstart
 
